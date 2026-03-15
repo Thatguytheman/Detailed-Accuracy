@@ -13,7 +13,7 @@ function DetailedAccDraw()
         local OffsetHeight = 6
 
         if ExtraStuffInstalled and extrasavedata.detailedacc.moveTapErrorMeterTop then
-            MeterY = 50 
+            MeterY = 50
         end
 
         MeterY = MeterY or 330
@@ -49,7 +49,7 @@ function DetailedAccDraw()
             TapOffsets[i][1] = TapOffsets[i][1] - love.timer.getDelta()
 
             local pointOnMeter = (((-TapOffsets[i][2] - Min) / (Max - Min)) * (MeterRight - MeterLeft)) + MeterLeft
-            
+
             love.graphics.line(pointOnMeter, MeterY - (OffsetHeight * (TapOffsets[i][1] / 3)), pointOnMeter, MeterY + (OffsetHeight * (TapOffsets[i][1] / 3)))
 
         end
@@ -64,8 +64,8 @@ function DetailedAccDraw()
 
         pressed1 = maininput:pressed("tap1") or (savedata.options.game.disableClick == false and maininput:pressed("mouse1"))
 	    pressed2 = maininput:pressed("tap2") or (savedata.options.game.disableClick == false and maininput:pressed("mouse2"))
-        
-        
+
+
 
         if pressed1 then
             DAkeys[1][1] = DAkeys[1][1] + 1
@@ -126,7 +126,7 @@ function DetailedAccDraw()
         elseif pos == "bottomLeft" then
             Tx = marginX
             Ty = screenH - Theight - marginY - 12 -- extra room for text
-            
+
         elseif pos == "bottomRight" then
             Tx = screenW - Twidth - marginX
             Ty = screenH - Theight - marginY - 12
@@ -136,9 +136,9 @@ function DetailedAccDraw()
 
     if mods["DetailedAcc"].config.SectionTimer or mods["DetailedAcc"].config.SectionBlips then
         --draw
-        
 
-        
+
+
 
         local Section
 
@@ -185,14 +185,14 @@ function DetailedAccDraw()
 
             end
 
-            
+
         end
 
         if mods["DetailedAcc"].config.SectionBlips and (tonumber(LastSDA) ~= tonumber(Section)) and (DetailedAccNotes and DetailedAccBuckets) and (LastSDA ~= 1) then
             --check for fc / perfect
             for i, v in ipairs(DetailedAccNotes) do
 
-                
+
                 table.sort(DetailedAccBuckets, function(k1, k2)
                     return k1.time < k2.time
                 end)
@@ -217,7 +217,7 @@ function DetailedAccDraw()
                                     current.fc = false
                                     current.perfect = false
                                 end
-                                
+
                                 if v.barely then
                                     current.perfect = false
                                 end
@@ -249,12 +249,12 @@ function DetailedAccDraw()
 
                 misses = t.misses > DetailedAccBuckets[tonumber(LastSDA) - 1].misses and DetailedAccBuckets[tonumber(LastSDA) - 1].misses or t.misses,
                 barelies = t.barelies > DetailedAccBuckets[tonumber(LastSDA) - 1].barelies and DetailedAccBuckets[tonumber(LastSDA) - 1].barelies or t.barelies,
-            
+
             }
 
             SessionBest = SessionBest or {}
 
-            
+
 
             if not SessionBest[cLevel] then
                 playBlip = false
@@ -270,7 +270,7 @@ function DetailedAccDraw()
 
                 misses = def.misses > DetailedAccBuckets[tonumber(LastSDA) - 1].misses and DetailedAccBuckets[tonumber(LastSDA) - 1].misses or def.misses,
                 barelies = def.barelies > DetailedAccBuckets[tonumber(LastSDA) - 1].barelies and DetailedAccBuckets[tonumber(LastSDA) - 1].barelies or def.barelies,
-            
+
             }
 
 
@@ -278,15 +278,15 @@ function DetailedAccDraw()
             GORESETLEVELDA = false
 
             if LvlDataDA.MaxMissPSection[DetailedAccBuckets[tonumber(LastSDA) - 1].name] then
-                
+
                 PassedMaxMisses = DetailedAccBuckets[tonumber(LastSDA) - 1].misses > LvlDataDA.MaxMissPSection[DetailedAccBuckets[tonumber(LastSDA) - 1].name]
-                
+
             end
 
             if PassedMaxMisses then
 
                 te.playOne(sounds.MthreshFail, "static", "sfx",mods["DetailedAcc"].config.BlipVolume)
-                
+
                 GORESETLEVELDA = true
 
                 if cs.restartOn == "Miss thresholds" then
@@ -313,16 +313,16 @@ function DetailedAccDraw()
             end
 
         end
-        
 
-        
+
+
         Section2 = Section
-        
+
         Twidth = Twidth or 100
 
         if mods["DetailedAcc"].config.SectionTimer then
 
-            
+
 
             local beat = math.max(cs.cBeat, 0)
 
@@ -345,8 +345,8 @@ function DetailedAccDraw()
                     love.graphics.rectangle("fill", Tx + 1, Ty + 1, (PcentTillEnd * (Twidth - 2)), Theight - 4)
                 end
             end
-            
-            
+
+
 
 
             love.graphics.setColor(0,0,0)

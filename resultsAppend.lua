@@ -28,9 +28,9 @@ function imgui.EpicImDrawListGraph(LineInMid, Data, circle, bookmarks)
 
         imgui.GetColorU32_Col(imgui.ImGuiCol_Separator)
     )
-    
 
-    
+
+
 
 
 
@@ -80,25 +80,25 @@ function imgui.EpicImDrawListGraph(LineInMid, Data, circle, bookmarks)
     end
 
     function valueToY(value)
-    
-        
+
+
         if type(value) ~= "number" then value = 0 end
 
         return (GraphSize[2] - (((value - Min) / (Max - Min)) * GraphSize[2])) + GraphPos[2]
-    
-    
+
+
     end
 
     function valueToX(value)
-    
-        
+
+
         if type(value) ~= "number" then value = 0 end
 
         local value2 = End - value
-        
+
         return (GraphSize[1] - (((value2 - Start) / (End - Start)) * GraphSize[1])) + GraphPos[1]
-    
-    
+
+
     end
 
     for i,b in ipairs(bookmarks) do
@@ -123,7 +123,7 @@ function imgui.EpicImDrawListGraph(LineInMid, Data, circle, bookmarks)
             "  " .. b.name -- dumb tingy
         )
     end
-    
+
     local LastPoint = {valueToX(Data[1][2]), valueToY(Data[1][1])}
     local CurrentPoint = nil
 
@@ -137,7 +137,7 @@ function imgui.EpicImDrawListGraph(LineInMid, Data, circle, bookmarks)
             imgui.GetColorU32_Vec4(imgui.ImVec4_Float(103/255, 103/255, 103/255, 1)), -- Color,
             2
         )
-        
+
     end
 
 
@@ -187,7 +187,7 @@ function imgui.EpicImDrawListGraph(LineInMid, Data, circle, bookmarks)
                     valueToX(Data[i][2]),
                     valueToY(Data[i][1])
                 }
-                
+
 
                 lineColor = imgui.GetColorU32_Col(imgui.ImGuiCol_Text)
 
@@ -203,7 +203,7 @@ function imgui.EpicImDrawListGraph(LineInMid, Data, circle, bookmarks)
                         uvToxy(CurrentPoint), -- P2
                         lineColor
                     )
-                end 
+                end
                 LastPoint = CurrentPoint
             else
                 drawList:AddCircleFilled(
@@ -245,10 +245,10 @@ function imgui.EpicImDrawListGraph(LineInMid, Data, circle, bookmarks)
     end
 
 
-    
 
 
-    
+
+
 
 
 
@@ -260,8 +260,8 @@ end
 
 st:setFgDraw(function(self)
 
-    
-    
+
+
 
     --Setup stuff
 
@@ -269,7 +269,7 @@ st:setFgDraw(function(self)
 
 
         -- Play sound
-        
+
         local Rank = 'what'
 		if self.lGrade == 'perfect' then
             Rank = 'perfect'
@@ -317,7 +317,7 @@ st:setFgDraw(function(self)
             -- score buck et
 
 
-            
+
 
             if v.miss or v.barely then
 
@@ -335,7 +335,7 @@ st:setFgDraw(function(self)
             end
 
         end
-        
+
         SectionNumber = 1
         SectionNumber = (SectionNumber > #DetailedAccBuckets) and #DetailedAccBuckets or SectionNumber
 
@@ -355,9 +355,9 @@ st:setFgDraw(function(self)
     helpers.SetNextWindowPos(0, 25, "ImGuiCond_FirstUseEver")
     helpers.SetNextWindowSize(180, 200, "ImGuiCond_FirstUseEver")
     imgui.Begin("Detailed Accuracy")
-    
 
-    
+
+
     -- Tabs
 
 
@@ -377,7 +377,7 @@ st:setFgDraw(function(self)
 
                 imgui.EpicImDrawListGraph(nil, DetailedAccAccs, false, DetailedAccBookmarks)
                 local last = mods["DetailedAcc"].config.DrawPrecision
-                
+
 
                 imgui.SetCursorPosY(imgui.GetContentRegionAvail().y/1.1)
 
@@ -400,11 +400,11 @@ st:setFgDraw(function(self)
         end
 
         if DetailedAccNotes and imgui.BeginTabItem("Section by section") then
-            
+
             imgui.BeginChild_Str(loc.get("Section names"), imgui.ImVec2_Float(0, 0), imgui.ImGuiChildFlags_AutoResizeX + imgui.ImGuiChildFlags_Border)
 
             for i, v in ipairs(DetailedAccBuckets) do
-                
+
                 local Sname = "" .. v.name -- .. " - " .. tostring(math.floor((helpers.GetAcc(v.totalHits, v.barelies, v.misses) * 10000) + 0.5) / 100) .. "%"
                 if imgui.Selectable_Bool(Sname, SectionPicked == v.name) then
                     SectionPicked = v.name
