@@ -1,0 +1,541 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+
+
+# hits, barely, miss, cs.cBeat, noteType, mine
+
+
+# Note collection
+
+[[patches]]
+[patches.pattern]
+target = "obj/GameManager.lua"
+pattern = '''function GameManager:addToScore(hits,barely,mine,beat)'''
+position = "after"
+payload = '''
+-- im gonn ado my OWN addmine to total
+
+if mine then
+
+    if (not cs.mineTotals2[beat]) then
+        cs.mineTotals2[beat] = true
+    else
+        hits = 0
+    end
+
+end
+
+
+
+table.insert(DetailedAccNotes, {hits = (hits or 1), barely = barely or false, miss = false, beat = cs.cBeat, noteType = noteType, mine = mine or false})
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "obj/GameManager.lua"
+pattern = '''function GameManager:handleMiss(hits,mine)'''
+position = "after"
+payload = '''
+
+if mine then
+    if (not cs.mineTotals2[beat2]) then
+        cs.mineTotals2[beat2] = true
+        hits2 = hits
+    else
+        hits2 = 0
+    end
+
+else
+
+    hits2 = hits
+
+end
+
+table.insert(DetailedAccNotes, {hits = (hits2 or 1), barely = false, miss = true, beat = dumbTime or cs.cBeat, noteType = noteType, mine = mine or false})
+'''
+match_indent = true
+
+
+[[patches]]
+[patches.pattern]
+target = "obj/GameManager.lua"
+pattern = '''rw:play(cs.cBeat)'''
+position = "before"
+payload = '''
+
+table.sort(cs.level.events, function(k1, k2)
+    if k1.time ~= k2.time then
+        return k1.time > k2.time
+    end
+    local o1 = k1.order or 0
+    local o2 = k2.order or 0
+    return o1 < o2
+end)
+
+DetailedAccBookmarks = {
+    {time = 0,
+    name = "Start"}
+}
+
+
+DAShowResults = nil
+
+local path = "Mods/DetailedAcc/LvlData/" .. string.sub(cLevel,1,string.len(cLevel) - 1) .. ".json"
+
+print(path)
+
+LvlDataDA = {}
+
+if love.filesystem.getInfo(path) then
+    LvlDataDA = dpf.loadJson(path)
+else
+
+    --Need to create data
+    LvlDataDA = {
+        Override = false,
+        Sections = {},
+        SectionBests = {},
+        MaxMissPSection = {}
+    }
+
+    dpf.saveJson(path, LvlDataDA)
+
+end
+
+if LvlDataDA.Sections then
+    for i, v in pairs(LvlDataDA.Sections) do
+        table.insert(DetailedAccBookmarks,  
+            {
+                time = v,
+                name = i
+            }
+        )
+    end
+end
+
+
+if not LvlDataDA.Override then
+
+    for i, v in ipairs(cs.level.events) do
+        if v.type == "bookmark" then
+            table.insert(DetailedAccBookmarks,  
+                {
+                    time = v.time,
+                    name = v.name
+                }
+            )
+        end
+        if v.type == "showResults" then
+            DAShowResults = v.time
+        end
+    end
+
+end
+
+
+
+
+table.sort(DetailedAccBookmarks, function(k1, k2)
+    if k1.time ~= k2.time then
+        return k1.time > k2.time
+    end
+end)
+
+DAShowResults = DAShowResults or (cs.level.events[#cs.level.events].time)
+
+'''
+match_indent = true
+
+
+
+
+
+
+
+
+
+
+
+
+
+#RESET
+
+[[patches]]
+[patches.pattern]
+target = "obj/GameManager.lua"
+pattern = '''function GameManager:resetLevel()'''
+position = "after"
+payload = '''
+    DAkeys = {{0,false},{0,false}}
+    DetailedAccNotes = {}
+    cs.mineTotals2 = {}
+    TapTiming2 = {}
+    TapOffsets = {}
+    DetailedAccBuckets = nil
+    Section2 = nil
+'''
+match_indent = true
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# block
+
+[[patches]]
+[patches.pattern]
+target = "obj/notes/Block.lua"
+pattern = '''cs.gm:addToScore(1, barely)'''
+position = "before"
+payload = '''
+    noteType = "block"
+    dumbTime = self.hb
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "obj/notes/Block.lua"
+pattern = '''cs.gm:handleMiss()'''
+position = "before"
+payload = '''
+    noteType = "block"
+    dumbTime = self.hb
+'''
+match_indent = true
+
+
+# bounce
+
+[[patches]]
+[patches.pattern]
+target = "obj/notes/Bounce.lua"
+pattern = '''cs.gm:addToScore(1, barely)'''
+position = "before"
+payload = '''
+    noteType = "bounce"
+    dumbTime = self.hb
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "obj/notes/Bounce.lua"
+pattern = '''cs.gm:handleMiss(1)'''
+position = "before"
+payload = '''
+    noteType = "bounce"
+    dumbTime = self.hb
+'''
+match_indent = true
+
+
+# hold
+
+[[patches]]
+[patches.pattern]
+target = "obj/notes/Hold.lua"
+pattern = '''cs.gm:addToScore(1,barely)'''
+position = "before"
+payload = '''
+    noteType = "hold start"
+    dumbTime = self.hb
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "obj/notes/Hold.lua"
+pattern = '''cs.gm:addToScore()'''
+position = "before"
+payload = '''
+    noteType = "hold end"
+    dumbTime = self.hb + self.duration
+'''
+match_indent = true
+
+
+[[patches]]
+[patches.pattern]
+target = "obj/notes/Hold.lua"
+pattern = '''cs.gm:handleMiss()
+				if not self.hitYet then --add another miss if the start was not hit'''
+position = "before"
+payload = '''
+    noteType = "hold"
+    dumbTime = self.hb
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "obj/notes/Hold.lua"
+pattern = '''cs.gm:handleMiss()
+				end'''
+position = "before"
+payload = '''
+    noteType = "hold"
+    dumbTime = self.hb
+'''
+match_indent = true
+
+
+
+[[patches]]
+[patches.pattern]
+target = "obj/notes/ExtraTap.lua"
+pattern = '''if self:checkPassedWindow() then --missed window to tap in'''
+position = "after"
+payload = '''
+    table.insert(TapTiming2, {"miss", cs.cBeat})
+    --table.insert(TapTiming2, {3, ""})
+'''
+match_indent = true
+
+
+
+
+
+# Mine
+
+[[patches]]
+[patches.pattern]
+target = "obj/notes/Mine.lua"
+pattern = '''cs.gm:handleMiss(1,true)'''
+position = "before"
+payload = '''
+    noteType = "mine"
+    beat2 = self.hb
+    dumbTime = self.hb
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "obj/notes/Mine.lua"
+pattern = '''cs.gm:addToScore(nil,nil,true,self.hb)'''
+position = "before"
+payload = '''
+    noteType = "mine"
+    dumbTime = self.hb
+'''
+match_indent = true
+
+# Minehold
+
+#[[patches]]
+#[patches.pattern]
+#target = "obj/notes/MineHold.lua"
+#pattern = '''cs.gm:handleMiss(1,true)'''
+#position = "before"
+#payload = '''
+#    noteType = "mine"
+#    beat2 = self.hb
+#    dumbTime = self.hb
+#'''
+#match_indent = true
+
+# idk whats up with that ^
+
+[[patches]]
+[patches.pattern]
+target = "obj/notes/MineHold.lua"
+pattern = '''if hit and ((completion <= 1) or (not self.activeLastFrame)) and (not cs.editMode) and (not self.unhittable) then'''
+position = "after"
+payload = '''
+    noteType = "minehold"
+    beat2 = self.hb
+    dumbTime = self.hb
+'''
+match_indent = true
+
+
+# side
+
+[[patches]]
+[patches.pattern]
+target = "obj/notes/Side.lua"
+pattern = '''if (not active) then --if it is not hit at all'''
+position = "before"
+payload = '''
+    noteType = "side"
+    dumbTime = self.hb
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "obj/notes/Side.lua"
+pattern = '''cs.gm:addToScore()'''
+position = "before"
+payload = '''
+    noteType = "side"
+    dumbTime = self.hb
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "states/Results.lua"
+pattern = '''for i, v in ipairs(self.tapTiming) do'''
+position = "before"
+payload = '''
+'''
+match_indent = true
+
+
+#dumb tapTiming things
+
+[[patches]]
+[patches.pattern]
+target = "obj/GameManager.lua"
+pattern = '''table.insert(cs.tapTiming,self:beatToMs(beat - cs.cBeat + msOffset))'''
+position = "before"
+payload = '''
+TapTiming2 = TapTiming2 or {}
+TapOffsets = TapOffsets or {}
+table.insert(TapTiming2, {self:beatToMs(beat - cs.cBeat + msOffset), cs.cBeat})
+table.insert(TapOffsets, {3, self:beatToMs(beat - cs.cBeat + msOffset)})
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "obj/GameManager.lua"
+pattern = '''elseif (t.beat > cs.cBeat - msOffset) and self:inTimingWindow(t.beat, t.timingWindow + t.antiSpamWindow) and pressed then'''
+position = "after"
+payload = '''
+table.insert(TapTiming2, {"miss", cs.cBeat})
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "obj/GameManager.lua"
+pattern = '''table.insert(cs.tapTiming,0)'''
+position = "after"
+payload = '''
+table.insert(TapTiming2, {0, cs.cBeat})
+table.insert(TapOffsets, {3, 0})
+'''
+match_indent = true
+
+
+# Apend..... i mean prepend opsies
+
+[[patches]]
+[patches.copy]
+target = "states/Results.lua"
+position = "prepend"
+sources = ["resultsAppend.lua"]
+
+[[patches]]
+[patches.copy]
+target = "obj/GameManager.lua"
+position = "prepend"
+sources = ["MidGame.lua"]
+
+[[patches]]
+[patches.pattern]
+target = "states/Results.lua"
+pattern = '''local st = Gamestate:new('Results')'''
+position = "at"
+payload = '''
+    --local st = Gamestate:new('Results')
+'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "states/Results.lua"
+pattern = '''st:setInit(function(self)'''
+position = "after"
+payload = '''
+    
+    DetailedAccAccs = {{100, 0}}
+
+    setupDetailedAccResults = false
+
+    local totalHits = 0
+    local misses = 0
+    local barelies = 0
+
+    for i, v in ipairs(DetailedAccNotes) do
+
+        if v.miss then
+            misses = misses + math.max(v.hits, 1)
+        elseif v.barely then
+            barelies = barelies + v.hits
+        end
+        totalHits = totalHits + v.hits
+
+        table.insert(DetailedAccAccs, {(((totalHits - misses - (barelies/4)) / totalHits)*100), v.beat})
+
+    end
+
+'''
+match_indent = true
+
+
+[[patches]]
+[patches.pattern]
+target = "obj/GameManager.lua"
+pattern = '''function GameManager:drawExpandedHud()'''
+position = "after"
+payload = '''
+    DetailedAccDraw()
+'''
+match_indent = true
+
+
+[[patches]]
+[patches.pattern]
+target = "states/SongSelect.lua"
+pattern = '''},self,'restartOn',ySpacing*5)'''
+position = "before"
+payload = '''
+,{"Miss thresholds", "Miss threshold"}
+'''
+match_indent = true
+
+
+
+
+
+
+[[patches]]
+[patches.pattern]
+target = "states/Game.lua"
+pattern = '''if cs.misses and cs.barelies then'''
+position = "before"
+payload = '''if GORESETLEVELDA then
+    GORESETLEVELDA = false  
+    if self.marathonData then
+        self:leave()
+        GameManager:resetMarathon()
+        cs = bs.load('Marathon')
+        GameManager:transferStateData(cs,self)
+        cs:init()
+    else
+        self:restartLevel()
+    end
+end
+'''
+match_indent = true
