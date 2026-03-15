@@ -16,7 +16,7 @@ function imgui.EpicImDrawListGraph(LineInMid, Data, circle, bookmarks)
     end
 
     -- Ok. half of height, and 0.8 width
-    local GraphSize = {0.9, 0.5}
+    local GraphSize = {0.95, 0.5}
     local GraphPos = {(1 - GraphSize[1]) / 2, 0.02}
 
     -- Background
@@ -112,22 +112,24 @@ function imgui.EpicImDrawListGraph(LineInMid, Data, circle, bookmarks)
                 valueToY(Max)
             }),
             imgui.GetColorU32_Vec4(imgui.ImVec4_Float(0,0,0,1)),
-            4
+            1
         )
+		local xy = uvToxy({
+			valueToX(b.time),
+			(((#bookmarks - i) / #bookmarks) * GraphSize[2]) + GraphPos[2]
+		})
+		xy.x = xy.x + 2
         drawList:AddText_Vec2(
-            uvToxy({
-                valueToX(b.time),
-                (((#bookmarks - i) / #bookmarks) * GraphSize[2]) + GraphPos[2]
-            }),
+            xy ,
             imgui.GetColorU32_Vec4(imgui.ImVec4_Float(1,1,1,1)),
-            "  " .. b.name -- dumb tingy
+            b.name
         )
     end
 
     local LastPoint = {valueToX(Data[1][2]), valueToY(Data[1][1])}
     local CurrentPoint = nil
 
-    radius = 3
+    local radius = 2
 
     if LineInMid then
         drawList:AddLine(
@@ -137,7 +139,49 @@ function imgui.EpicImDrawListGraph(LineInMid, Data, circle, bookmarks)
             imgui.GetColorU32_Vec4(imgui.ImVec4_Float(103/255, 103/255, 103/255, 1)), -- Color,
             2
         )
+	else
+		local gradeMargins = {
+			{ 100, 'perfect' },
+			{ 98, 's','plus' },
+			{ 95, 's' },
+			{ 93, 'a', 'plus' },
+			{ 90, 'a' },
+			{87, 'b', 'plus' },
+			{ 83, 'b' },
+			{ 80, 'b', 'minus' },
+			{ 77, 'c', 'plus' },
+			{ 73, 'c' },
+			{ 70, 'c', 'minus' },
+			{ 64, 'd', 'plus' },
+			{ 56, 'd' },
+			{ 50, 'd', 'minus' },
+			{ 0, 'f' }
+		}
+		for i, data in ipairs(gradeMargins) do
+			if 0 <= data[1] and data[1] < 100 and Min <= data[1] and data[1] < Max then
+				drawList:AddLine(
+					uvToxy({ valueToX(Start), valueToY(data[1]) }),
+					uvToxy({ valueToX(End), valueToY(data[1]) }),
+					imgui.GetColorU32_Vec4((i == #gradeMargins or data[2] ~= gradeMargins[i + 1][2]) and imgui.ImVec4_Float(0.67, 0.67, 0.67, 1) or imgui.ImVec4_Float(0.33, 0.33, 0.33, 1)),
+					1
+				)
 
+				if Max - Min < 80 or not data[3] then
+					local grade = data[2]:upper() .. ({ [""] = "", plus = "+", minus = "-" })[data[3] or ""]
+					local xy = uvToxy({
+						valueToX(Start),
+						valueToY(data[1])
+					})
+					xy.x = xy.x + 2
+					xy.y = xy.y - 11
+					drawList:AddText_Vec2(
+						xy,
+						imgui.GetColorU32_Vec4(imgui.ImVec4_Float(1,1,1,1)),
+						grade
+					)
+				end
+			end
+		end
     end
 
 
@@ -365,7 +409,7 @@ st:setFgDraw(function(self)
     if imgui.BeginTabBar("DetailedAccTabs") then
 
         if TapTiming2 and (TapTiming2[1]) then
-            if imgui.BeginTabItem("##Tap Offset Graph") then
+            if imgui.BeginTabItem("Tap Offset Graph") then
                 imgui.EpicImDrawListGraph(0, TapTiming2, true, DetailedAccBookmarks)
 
                 imgui.EndTabItem()
