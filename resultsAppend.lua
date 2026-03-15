@@ -385,14 +385,22 @@ st:setFgDraw(function(self)
 
                 if last ~= mods["DetailedAcc"].config.DrawPrecision then
                     mods["DetailedAcc"].config.DrawPrecision = last
-                    dpf.saveJson("Mods/DetailedAcc/mod.json", mods.DetailedAcc)
+					if mods.DetailedAcc.path then -- dev fix
+						dpf.saveJson(mods.DetailedAcc.path .. "/config.json", mods.DetailedAcc.config)
+					else
+						dpf.saveJson("Mods/DetailedAcc/mod.json", mods.DetailedAcc)
+					end
                 end
 
                 local last2 = helpers.InputBool("Zoom In?", mods["DetailedAcc"].config.ZoomIn)
 
                 if last2 ~= mods["DetailedAcc"].config.ZoomIn then
                     mods["DetailedAcc"].config.ZoomIn = last2
-                    dpf.saveJson("Mods/DetailedAcc/mod.json", mods.DetailedAcc)
+					if mods.DetailedAcc.path then -- dev fix
+						dpf.saveJson(mods.DetailedAcc.path .. "/config.json", mods.DetailedAcc.config)
+					else
+						dpf.saveJson("Mods/DetailedAcc/mod.json", mods.DetailedAcc)
+					end
                 end
 
                 imgui.EndTabItem()
