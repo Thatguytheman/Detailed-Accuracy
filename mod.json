@@ -1,2 +1,2 @@
 {"author":"Thatguytheman","description":"Adds mor info about accuracy","config":{"KeyPresses":true,"DrawPrecision":1,"ShowBeat":true,"TapErrorMeter":true,"TapXOffset":0,"TapYOffset":0,"KeyPressesRight":true,"SectionBlips":true,"ZoomIn":false,"TimerXOffset":0,"SectionTimer":true,"TimerYOffset":0,"MeterYOffset":0,"TwidthAdd":0,"BlipVolume":3}
-,"enabled":true,"name":"Detailed Accuracy","id":"DetailedAcc","version":"2.0.0.0.1"}
+,"enabled":true,"name":"Detailed Accuracy","id":"DetailedAcc","version":"2.0.1"}

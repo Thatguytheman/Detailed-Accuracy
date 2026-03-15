@@ -15,9 +15,9 @@ function imgui.EpicImDrawListGraph(LineInMid, Data, circle, bookmarks)
         return imgui.ImVec2_Float(((uv[1] * DAsize.x)) + DApos.x, ((uv[2] * DAsize.y)) + DApos.y)
     end
 
-    -- Ok. half of height, and 0.8 width
-    local GraphSize = {0.95, 0.5}
-    local GraphPos = {(1 - GraphSize[1]) / 2, 0.02}
+    -- Ok. 0.8 of height, and full width
+    local GraphSize = { 1, 1 }
+    local GraphPos = { (1 - GraphSize[1]) / 2, 0 }
 
     -- Background
     drawList:AddQuadFilled(
@@ -28,11 +28,6 @@ function imgui.EpicImDrawListGraph(LineInMid, Data, circle, bookmarks)
 
         imgui.GetColorU32_Col(imgui.ImGuiCol_Separator)
     )
-
-
-
-
-
 
     -- Graphing
 
@@ -102,28 +97,30 @@ function imgui.EpicImDrawListGraph(LineInMid, Data, circle, bookmarks)
     end
 
     for i,b in ipairs(bookmarks) do
-        drawList:AddLine(
-            uvToxy({
-                valueToX(b.time),
-                valueToY(Min)
-            }),
-            uvToxy({
-                valueToX(b.time),
-                valueToY(Max)
-            }),
-            imgui.GetColorU32_Vec4(imgui.ImVec4_Float(0,0,0,1)),
-            1
-        )
-		local xy = uvToxy({
-			valueToX(b.time),
-			(((#bookmarks - i) / #bookmarks) * GraphSize[2]) + GraphPos[2]
-		})
-		xy.x = xy.x + 2
-        drawList:AddText_Vec2(
-            xy ,
-            imgui.GetColorU32_Vec4(imgui.ImVec4_Float(1,1,1,1)),
-            b.name
-        )
+		if i ~= 1 then
+			drawList:AddLine(
+				uvToxy({
+					valueToX(b.time),
+					valueToY(Min)
+				}),
+				uvToxy({
+					valueToX(b.time),
+					valueToY(Max)
+				}),
+				imgui.GetColorU32_Vec4(imgui.ImVec4_Float(0,0,0,1)),
+				1
+			)
+			local xy = uvToxy({
+				valueToX(b.time),
+				(((#bookmarks - i) / #bookmarks) * GraphSize[2]) + GraphPos[2]
+			})
+			xy.x = xy.x + 2
+			drawList:AddText_Vec2(
+				xy ,
+				imgui.GetColorU32_Vec4(imgui.ImVec4_Float(1,1,1,1)),
+				b.name
+			)
+		end
     end
 
     local LastPoint = {valueToX(Data[1][2]), valueToY(Data[1][1])}
@@ -183,7 +180,6 @@ function imgui.EpicImDrawListGraph(LineInMid, Data, circle, bookmarks)
 			end
 		end
     end
-
 
     if circle then
         if tostring(Data[1][1]) ~= "miss" then
@@ -274,7 +270,7 @@ function imgui.EpicImDrawListGraph(LineInMid, Data, circle, bookmarks)
         drawPrecisionCooldown = drawPrecisionCooldown - 1
     end
 
-    if not circle then
+    if not circle and #Data > 1 then
         drawList:AddLine(
             uvToxy({
                 valueToX(Data[#Data][2]),
@@ -287,26 +283,10 @@ function imgui.EpicImDrawListGraph(LineInMid, Data, circle, bookmarks)
             lineColor
         )
     end
-
-
-
-
-
-
-
-
-
-
-
-
 end
 
 
 st:setFgDraw(function(self)
-
-
-
-
     --Setup stuff
 
     if not setupDetailedAccResults then
@@ -418,15 +398,9 @@ st:setFgDraw(function(self)
 
         if DetailedAccAccs then
             if imgui.BeginTabItem("Accuracy Graph") then
-
-                imgui.EpicImDrawListGraph(nil, DetailedAccAccs, false, DetailedAccBookmarks)
                 local last = mods["DetailedAcc"].config.DrawPrecision
 
-
-                imgui.SetCursorPosY(imgui.GetContentRegionAvail().y/1.1)
-
-                local last = helpers.SliderInt("Draw Precision", last, 1, #DetailedAccAccs)
-
+                last = helpers.SliderInt("Draw Precision", last, 1, #DetailedAccAccs)
                 if last ~= mods["DetailedAcc"].config.DrawPrecision then
                     mods["DetailedAcc"].config.DrawPrecision = last
 					if mods.DetailedAcc.path then -- dev fix
@@ -436,16 +410,17 @@ st:setFgDraw(function(self)
 					end
                 end
 
-                local last2 = helpers.InputBool("Zoom In?", mods["DetailedAcc"].config.ZoomIn)
-
-                if last2 ~= mods["DetailedAcc"].config.ZoomIn then
-                    mods["DetailedAcc"].config.ZoomIn = last2
+                last = helpers.InputBool("Zoom In?", mods["DetailedAcc"].config.ZoomIn)
+                if last ~= mods["DetailedAcc"].config.ZoomIn then
+                    mods["DetailedAcc"].config.ZoomIn = last
 					if mods.DetailedAcc.path then -- dev fix
 						dpf.saveJson(mods.DetailedAcc.path .. "/config.json", mods.DetailedAcc.config)
 					else
 						dpf.saveJson("Mods/DetailedAcc/mod.json", mods.DetailedAcc)
 					end
                 end
+
+                imgui.EpicImDrawListGraph(nil, DetailedAccAccs, false, DetailedAccBookmarks)
 
                 imgui.EndTabItem()
             end
@@ -456,8 +431,14 @@ st:setFgDraw(function(self)
             imgui.BeginChild_Str(loc.get("Section names"), imgui.ImVec2_Float(0, 0), imgui.ImGuiChildFlags_AutoResizeX + imgui.ImGuiChildFlags_Border)
 
             for i, v in ipairs(DetailedAccBuckets) do
-
-                local Sname = "" .. v.name -- .. " - " .. tostring(math.floor((helpers.GetAcc(v.totalHits, v.barelies, v.misses) * 10000) + 0.5) / 100) .. "%"
+				--[[ v.totalHits = v.totalHits or 0
+				v.misses = v.misses or 0
+				v.barelies = v.barelies or 0
+				local acc = math.floor((((v.totalHits - v.misses - (v.barelies/4)) / v.totalHits) * 10000) + 0.5) / 100
+				if acc ~= acc then -- check for nan
+					acc = 100
+				end ]]
+                local Sname = v.name .. --[[ " - " .. tostring(acc) .. ]] "##" .. i
                 if imgui.Selectable_Bool(Sname, SectionPicked == v.name) then
                     SectionPicked = v.name
                     SectionNumber = i

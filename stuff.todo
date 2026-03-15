@@ -4,5 +4,6 @@ add axes for accuracy and tap offset graphs
 remove print spam - i tink i did it
 fix pixel inaccuracy with section timer when theres no sections - YES
 add xy offset configs for tap buttons - mhm
-prefix section tabs in imgui with their id (hidden with ##) 
 check the missed patch in MineHold.lua - i tink
+
+prefix section tabs in imgui with their id (hidden with ##) - Penta: did this
