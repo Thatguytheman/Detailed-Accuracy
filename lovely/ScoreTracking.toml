@@ -108,7 +108,7 @@ end
 
 if LvlDataDA.Sections then
     for i, v in pairs(LvlDataDA.Sections) do
-        table.insert(DetailedAccBookmarks,  
+        table.insert(DetailedAccBookmarks,
             {
                 time = v,
                 name = i
@@ -122,7 +122,7 @@ if not LvlDataDA.Override then
 
     for i, v in ipairs(cs.level.events) do
         if v.type == "bookmark" then
-            table.insert(DetailedAccBookmarks,  
+            table.insert(DetailedAccBookmarks,
                 {
                     time = v.time,
                     name = v.name
@@ -145,7 +145,7 @@ table.sort(DetailedAccBookmarks, function(k1, k2)
     end
 end)
 
-DAShowResults = DAShowResults or (cs.level.events[#cs.level.events].time)
+DAShowResults = DAShowResults or (#cs.level.events > 0 and cs.level.events[#cs.level.events].time) or 0
 
 '''
 match_indent = true
@@ -468,7 +468,7 @@ target = "states/Results.lua"
 pattern = '''st:setInit(function(self)'''
 position = "after"
 payload = '''
-    
+
     DetailedAccAccs = {{100, 0}}
 
     setupDetailedAccResults = false
@@ -526,7 +526,7 @@ target = "states/Game.lua"
 pattern = '''if cs.misses and cs.barelies then'''
 position = "before"
 payload = '''if GORESETLEVELDA then
-    GORESETLEVELDA = false  
+    GORESETLEVELDA = false
     if self.marathonData then
         self:leave()
         GameManager:resetMarathon()
