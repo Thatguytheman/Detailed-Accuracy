@@ -173,7 +173,7 @@ table.sort(DetailedAccBookmarks, function(k1, k2)
     end
 end)
 
-DAShowResults = DAShowResults or (cs.level.events[#cs.level.events].time)
+DAShowResults = DAShowResults or (#cs.level.events > 0 and cs.level.events[#cs.level.events].time) or 0
 
 '''
 match_indent = true
