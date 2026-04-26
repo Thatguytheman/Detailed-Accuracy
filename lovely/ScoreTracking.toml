@@ -92,16 +92,18 @@ LvlDataDA = {}
 
 print(cs.variant)
 
+local variantName = cs.variant and cs.variant.name or "No Manifest Found"
+
 
 
 
 if love.filesystem.getInfo(path) then
     LvlDataDA = dpf.loadJson(path)
 
-    if not LvlDataDA[cs.variant.name] then
+    if not LvlDataDA[variantName] then
 
         --Need to create varient data
-        LvlDataDA[cs.variant.name] = {
+        LvlDataDA[variantName] = {
             Override = false,
             Sections = {},
             SectionBests = {},
@@ -115,7 +117,7 @@ else
 
     --Need to create data
     LvlDataDA = {
-        [cs.variant.name] =
+        [variantName] =
         {
         Override = false,
         Sections = {},
@@ -128,9 +130,9 @@ else
 
 end
 
-if LvlDataDA[cs.variant.name].Sections then
-    for i, v in pairs(LvlDataDA[cs.variant.name].Sections) do
-        table.insert(DetailedAccBookmarks,  
+if LvlDataDA[variantName].Sections then
+    for i, v in pairs(LvlDataDA[variantName].Sections) do
+        table.insert(DetailedAccBookmarks,
             {
                 time = v,
                 name = i
@@ -146,11 +148,11 @@ for i, v in pairs(LvlDataDA) do
 end
 
 
-if not LvlDataDA[cs.variant.name].Override then
+if not LvlDataDA[variantName].Override then
 
     for i, v in ipairs(cs.level.events) do
         if v.type == "bookmark" then
-            table.insert(DetailedAccBookmarks,  
+            table.insert(DetailedAccBookmarks,
                 {
                     time = v.time,
                     name = v.name
@@ -508,7 +510,7 @@ target = "states/Results.lua"
 pattern = '''st:setInit(function(self)'''
 position = "after"
 payload = '''
-    
+
     DetailedAccAccs = {{100, 0}}
 
     setupDetailedAccResults = false
@@ -566,7 +568,7 @@ target = "states/Game.lua"
 pattern = '''if cs.misses and cs.barelies then'''
 position = "before"
 payload = '''if GORESETLEVELDA then
-    GORESETLEVELDA = false  
+    GORESETLEVELDA = false
     if self.marathonData then
         self:leave()
         GameManager:resetMarathon()
