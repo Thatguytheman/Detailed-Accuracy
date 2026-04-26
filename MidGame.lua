@@ -239,15 +239,17 @@ function DetailedAccDraw()
 
             secName = cs.rateMod .. "x-" .. DetailedAccBuckets[tonumber(LastSDA) - 1].name
 
-            if not LvlDataDA[cs.variant.name].SectionBests[secName] then
+			local variantName = cs.variant and cs.variant.name or "No Manifest Found"
+
+            if not LvlDataDA[variantName].SectionBests[secName] then
                 playBlip = false
             end
 
-            local t = LvlDataDA[cs.variant.name].SectionBests[secName] or {misses = 99999999999, barelies = 99999999999}
+            local t = LvlDataDA[variantName].SectionBests[secName] or {misses = 99999999999, barelies = 99999999999}
 
             local isMissPB = t.misses > DetailedAccBuckets[tonumber(LastSDA) - 1].misses
 
-            LvlDataDA[cs.variant.name].SectionBests[secName] = {
+            LvlDataDA[variantName].SectionBests[secName] = {
 
                 misses = t.misses > DetailedAccBuckets[tonumber(LastSDA) - 1].misses and DetailedAccBuckets[tonumber(LastSDA) - 1].misses or t.misses,
                 barelies = t.barelies > DetailedAccBuckets[tonumber(LastSDA) - 1].barelies and DetailedAccBuckets[tonumber(LastSDA) - 1].barelies or t.barelies,
@@ -279,9 +281,9 @@ function DetailedAccDraw()
             local PassedMaxMisses = false
             GORESETLEVELDA = false
 
-            if LvlDataDA[cs.variant.name].MaxMissPSection[DetailedAccBuckets[tonumber(LastSDA) - 1].name] then
+            if LvlDataDA[variantName].MaxMissPSection[DetailedAccBuckets[tonumber(LastSDA) - 1].name] then
 
-                PassedMaxMisses = DetailedAccBuckets[tonumber(LastSDA) - 1].misses > LvlDataDA[cs.variant.name].MaxMissPSection[DetailedAccBuckets[tonumber(LastSDA) - 1].name]
+                PassedMaxMisses = DetailedAccBuckets[tonumber(LastSDA) - 1].misses > LvlDataDA[variantName].MaxMissPSection[DetailedAccBuckets[tonumber(LastSDA) - 1].name]
 
             end
 
@@ -386,7 +388,7 @@ function DetailedAccDraw()
             love.graphics.setFont(fonts.blowafuse)
             love.graphics.setColor(0,0,0)
             love.graphics.printf(result, 250, 180, 100, "center")
-        
+
         end
 
     end
